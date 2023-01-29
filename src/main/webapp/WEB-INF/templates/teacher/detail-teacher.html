@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>个人网页</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/layui.css">
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+    <script src="assets/layui.js"></script>
+    <style type="text/css">
+        /* CSS Document */
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .clearfix:after {
+            content: "";
+            display: block;
+            height: 0;
+            visibility: hidden;
+            clear: both;
+        }
+
+        .clearfix {
+            *zoom: 1;
+        }
+
+        body {
+            /*background-image: url(image/bg.jpg);*/
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        .content {
+            width: 900px;
+            height: 500px;
+            margin: 100px auto 0 auto;
+            border-radius: 10px;
+            background-color: rgba(236, 236, 236, 0.59);
+            transition: all 1.0s;
+            /*box-shadow: 0px 0px 20px rgba(0,0,0,0.3);*/
+        }
+
+        .content img {
+            float: left;
+            width: 200px;
+            height: 200px;
+            margin: 150px 0 0 80px;
+            border-radius: 100px;
+
+        }
+
+        .content:hover {
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.52);
+        }
+
+        .content_r {
+            float: right;
+            width: 500px;
+            margin: 80px 60px 0 0;
+            /*	background-color: pink;*/
+        }
+
+        .content_l {
+            float: left;
+            width: 100%;
+            text-align: center;
+        }
+
+        .content_l h5 {
+
+            font-size: 17px;
+        }
+
+        .cc {
+            margin-top: 10px;
+            color: #1F2023;
+            font-size: 18px;
+        }
+
+        .color_1 {
+            color: #4855EC;
+            font-size: 18px;
+        }
+
+        .deeppink {
+            color: deeppink;
+        }
+
+        .link {
+            margin-top: 30px;
+        }
+
+        .link a {
+            display: block;
+            float: left;
+            width: 120px;
+            height: 45px;
+            margin: 5px 5px 0 0;
+            /*	padding: 0 15px;*/
+            color: #fff;
+            line-height: 45px;
+            transition: all 0.8s;
+            /*	background-color: deeppink;*/
+
+        }
+
+        .link a:hover {
+            background-color: rgba(0, 201, 243, 0.35);
+        }
+
+        .deeppink_1 {
+            background-color: deeppink;
+        }
+
+        .dodgerblue {
+            background-color: dodgerblue;
+        }
+
+        .magenta {
+            background-color: magenta;
+        }
+
+        .orange {
+            background-color: orange;
+        }
+    </style>
+</head>
+
+<body>
+<div class="content">
+    <img id="image" src="">
+    <div class="content_r clearfix">
+        <div class="content_l clearfix">
+            <h2>Hi~ 我是</h2><h2 id="name" style="color: aqua;">明金</h2><h2>Welcome here ！</h2>
+            <span class="cc">性别:&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="sex" class="cc">男</span> <br/>
+            <span class="cc">工号:&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="id" class="cc">202010530913</span>
+            <p class="cc"></p>
+            <br>
+            <span class="deeppink">简介:&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="intro" class="deeppink">只要路是对的，就不怕路远。</span>
+            <div class="link">
+                <a id="relate" href="javascript:void(0)" class="dodgerblue">联系方式</a>
+                <a id="count" href="javascript:void(0)" class="deeppink_1">指导学生数量</a>
+                <a id="pwd"  href="javascript:void(0)" class="magenta">密码</a>
+                <a id="up" href="javascript:void(0)" class="orange">修改信息</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+
+    var password;
+
+    var phone;
+    var qq;
+    var email;
+
+    var count;
+    $(function (){
+        $.ajax({
+            url:"query-type",
+            type:"post",
+            dataType:"json",
+            success:function (res){
+                $.ajax({
+                    url:"querry-teacher-login",
+                    type:"post",
+                    dataType:"json",
+                    data:{"id":res.id},
+                    success:function (item){
+                        // 加载头像
+                        let binary="";
+                        const bytesOne=new Uint8Array(item.msg.image);
+                        const len=bytesOne.byteLength;
+
+                        for(let s=0;s<len;s++){
+                            binary+=String.fromCharCode(bytesOne[s]);
+                        }
+                        let imageBase64One=window.btoa(binary);
+
+                        $("#image").attr("src","data:image/jpg;base64,"+imageBase64One);
+                        //加载其余部分
+                        $("#id").html(item.msg.id);
+                        $("#name").html(item.msg.name);
+                        // $("#pwd").html(item.msg.password);
+                        // $("#clazz").html(item.msg.clazz);
+                        // $("#phone").html(item.msg.phone);
+                        // $("#qq").html(item.msg.qq);
+                        // $("#email").html(item.msg.email);
+                        // $("#major").html(item.msg.major);
+                        password=item.msg.password;
+                        phone=item.msg.phone;
+                        qq=item.msg.qq;
+                        email=item.msg.email;
+                        count=item.msg.count;
+                        $("#sex").html(item.msg.sex);
+                        $("#intro").html(item.msg.intro);
+
+                    }
+                });
+            }
+        });
+
+    })
+    $("#up").click(function (){
+        window.location.href="teacher-update-teacher";
+    });
+    $("#relate").click(function(){
+        // phone="15883417556";
+        // qq="2822432487";
+        // email="2822432487@qq.com";
+        layer.alert('电话:'+phone+'<br/>'+'QQ:'+qq+'<br/>'+'邮箱:'+email, {
+            skin: 'layui-layer-molv' //样式类名
+            ,closeBtn: 0
+        }, function(){
+            layer.closeAll();
+        });
+    });
+    $("#count").click(function(){
+        layer.alert('指导人数:'+count, {
+            skin: 'layui-layer-molv' //样式类名
+            ,closeBtn: 0
+        }, function(){
+            layer.closeAll();
+        });
+    });
+    $("#pwd").click(function(){
+        layer.alert('密码:'+password, {
+            skin: 'layui-layer-molv' //样式类名
+            ,closeBtn: 0
+        }, function(){
+            layer.closeAll();
+        });
+    });
+</script>
+</html>
+

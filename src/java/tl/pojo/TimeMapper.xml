@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tl.mapper.TimeMapper">
+    <select id="getTime" resultType="tl.pojo.Time">
+        select * from time
+    </select>
+
+    <delete id="deleteTime">
+        delete from time
+    </delete>
+
+    <insert id="addTime" >
+        insert into time(startTime,endTime) values (#{startTime},#{endTime})
+    </insert>
+</mapper>

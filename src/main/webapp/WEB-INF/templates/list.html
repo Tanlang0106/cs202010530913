@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <title>计算机科学与技术-课程案例</title>
+    <link rel="stylesheet" href="assets/css/layui.css">
+    <script src="assets/jquery-3.6.0.min.js"></script>
+    <script src="assets/layui.js"></script>
+    <style type="text/css">
+        #childFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            min-width: 400px;
+            background-color: #fafafa;
+        }
+    </style>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">后台管理</div>
+
+
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img id="image" src="data:image/jpg;base64,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" class="layui-nav-img">
+                    <span id="name">贤心</span>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a id="upImage" href="javascript:void(0)" target="content">修改头像</a></dd>
+                    <dd><a href="javascript:void(0)" onclick="out()">退出系统</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+
+
+<!--                        <li class="layui-nav-item layui-this">-->
+<!--                            <a href="student-list-admin" target="content">学生管理</a>-->
+<!--                        </li>-->
+
+
+                        <li class="layui-nav-item" id="root" style="display: none"><!-- layui-nav-itemed -->
+                            <a class="" href="javascript:;">管理员</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="student-list-admin" target="content">学生管理</a></dd>
+                                <dd><a href="teacher-list-admin" target="content">教师管理</a></dd>
+                                <dd><a href="zhiyuan-list-admin" target="content">志愿管理</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item" id="student" style="display: none"><!-- layui-nav-itemed -->
+                            <a class="" href="javascript:;">学生</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="student-detail-student" target="content">学生信息</a></dd>
+                                <dd><a href="volunteer-student" target="content">志愿填报</a></dd>
+                            </dl>
+                        </li>
+                        <li class="layui-nav-item" id="teacher" style="display: none"><!-- layui-nav-itemed -->
+                            <a class="" href="javascript:;">老师</a>
+                            <dl class="layui-nav-child">
+                                <dd><a href="teacher-detail-teacher" target="content">老师信息</a></dd>
+                                <dd><a href="teacher-listStudent-teacher" target="content">我的学生</a></dd>
+                            </dl>
+                        </li>
+
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <iframe name="content" id="childFrame" src="welcome"></iframe>
+        <input type="file" style="display: none" id="upload">
+    </div>
+
+</div>
+
+</body>
+
+<script>
+    var loginID;
+    var loginType;
+    $(function (){
+       $.ajax({
+           url:"query-type",
+           type:"post",
+           dataType:"json",
+           success:function (data){
+               loginID=data.id;
+               loginType=data.msg;
+               message(loginType,loginID);
+           }
+
+
+       }) ;
+
+    });
+    function message(loginType,loginID){
+        if (loginType==0){
+            $("#root").attr("style","display:block");
+            $.ajax({
+                url: "querry-root-login",
+                type: "post",
+                data:{"id":loginID},
+                dataType: "json",
+                success:function (res){
+                    $("#name").html(res.msg.name);
+
+                    let binary="";
+                    const bytesOne=new Uint8Array(res.msg.image);
+                    const len=bytesOne.byteLength;
+
+                    for(let s=0;s<len;s++){
+                        binary+=String.fromCharCode(bytesOne[s]);
+                    }
+                    let imageBase64One=window.btoa(binary);
+                    $("#image").attr("src","data:image/jpg;base64,"+imageBase64One);
+                }
+            })
+        }else if (loginType==1){
+            $("#student").attr("style","display:block");
+            $.ajax({
+                url: "querry-student-login",
+                type: "post",
+                data:{"id":loginID},
+                dataType: "json",
+                success:function (res){
+                    $("#name").html(res.msg.name);
+
+                    let binary="";
+                    const bytesOne=new Uint8Array(res.msg.image);
+                    const len=bytesOne.byteLength;
+
+                    for(let s=0;s<len;s++){
+                        binary+=String.fromCharCode(bytesOne[s]);
+                    }
+                    let imageBase64One=window.btoa(binary);
+                    $("#image").attr("src","data:image/jpg;base64,"+imageBase64One);
+                }
+            })
+        }else if (loginType==2){
+            $("#teacher").attr("style","display:block");
+            $.ajax({
+                url: "querry-teacher-login",
+                type: "post",
+                data:{"id":loginID},
+                dataType: "json",
+                success:function (res){
+                    $("#name").html(res.msg.name);
+
+                    let binary="";
+                    const bytesOne=new Uint8Array(res.msg.image);
+                    const len=bytesOne.byteLength;
+
+                    for(let s=0;s<len;s++){
+                        binary+=String.fromCharCode(bytesOne[s]);
+                    }
+                    let imageBase64One=window.btoa(binary);
+                    $("#image").attr("src","data:image/jpg;base64,"+imageBase64One);
+                }
+            })
+        }
+    }
+    $("#upImage").click(function (){
+        $("#upload").click();
+    });
+    $("#upload").change(function (){
+        if (loginType==0){
+
+            let formData=new FormData();
+            formData.append("pic",$("#upload")[0].files[0]);
+            formData.append("id",loginID);
+            $.ajax({
+                type:"post",
+                url:"upImage-admin",
+                data:formData,
+                contentType:false,
+                processData:false,
+                success:function (res){
+
+                    console.log(res.msg);
+                    message(loginType,loginID);
+
+
+                }
+            });
+
+        }else if (loginType==1){
+            let formData=new FormData();
+            formData.append("pic",$("#upload")[0].files[0]);
+            formData.append("id",loginID);
+            $.ajax({
+                type:"post",
+                url:"upImage-student",
+                data:formData,
+                contentType:false,
+                processData:false,
+                success:function (res){
+
+                    console.log(res.msg);
+                    message(loginType,loginID);
+
+                }
+            });
+        }else if (loginType==2){
+            let formData=new FormData();
+            formData.append("pic",$("#upload")[0].files[0]);
+            formData.append("id",loginID);
+            $.ajax({
+                type:"post",
+                url:"upImage-teacher",
+                data:formData,
+                contentType:false,
+                processData:false,
+                success:function (res){
+
+                    console.log(res.msg);
+                    message(loginType,loginID);
+
+                }
+            });
+        }
+
+
+    });
+    function out(){
+        window.location.replace("login");
+    }
+</script>
+</html>

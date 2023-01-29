@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tl.mapper.TeacherMapper">
+    <!--    查询所有的老师数据-->
+    <select id="querryAllTeacher" resultType="tl.pojo.Teacher">
+        select * from teacher
+    </select>
+    <!--    添加老师数据-->
+    <insert id="addTeacher" parameterType="tl.pojo.Teacher">
+        insert into teacher(id,name,password,intro) values(#{id},#{name},#{password},#{intro})
+    </insert>
+
+
+    <!--通过分页查询所有老师数据-->
+    <select id="querryAllTeacherByPage" resultType="tl.pojo.Teacher">
+        select * from teacher order by id asc limit #{begin},#{pageSize}
+    </select>
+    <!--查询数据条数-->
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from teacher
+    </select>
+    <!--    管理员添加老师数据-->
+    <insert id="addTeacherByAdmin" parameterType="tl.pojo.Teacher">
+        insert into teacher(id,password,name) values (#{id},#{password},#{name})
+    </insert>
+    <!--    管理员删除学生数据-->
+    <delete id="deleteTeacher" parameterType="java.lang.String">
+        delete from teacher where id=#{id}
+    </delete>
+    <!--    通过id查询teacher信息-->
+    <select id="querryTeacherById" parameterType="java.lang.String" resultType="tl.pojo.Teacher">
+        select * from teacher where id=#{id}
+    </select>
+    <!--    管理员修改老师数据-->
+    <update id="updateTeacherByAdmin" parameterType="tl.pojo.Student">
+        update teacher
+        set password=#{password},name=#{name},count=#{count}
+        where id=#{id};
+    </update>
+
+
+
+<!--    登陆时，通过id，password查询教师是否存在-->
+    <select id="querryTeacherExist" resultType="java.lang.Integer">
+        select count(*)
+        from teacher where id=#{id} and password=#{password};
+    </select>
+
+    <!--    修改老师头像-->
+    <update id="updateImage">
+        update teacher set image=#{image} where id=#{id}
+    </update>
+
+    <update id="updateTeacherByTeacher" parameterType="tl.pojo.Teacher">
+        update teacher
+        set name=#{name},password=#{password},count=#{count},sex=#{sex},intro=#{intro},phone=#{phone},qq=#{qq},email=#{email}
+        where id=#{id}
+    </update>
+</mapper>

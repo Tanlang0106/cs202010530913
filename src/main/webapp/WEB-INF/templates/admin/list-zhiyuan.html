@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/layui.css">
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+    <script src="assets/layui.js"></script>
+</head>
+<body>
+<div class="layui-container">
+
+    <div class="layui-row" style="padding-top: 20px;">
+        <div class="layui-col-md10 layui-col-md-offset2">
+            <span style="font-size: 40px;background-color: #999999"><strong>现在时间是:&nbsp;&nbsp;</strong></span><span id="now" style="font-size: 40px;color: #00F7DE;background-color: #999999"></span>
+            <hr/>
+        </div>
+    </div>
+    <div class="layui-row" style="padding-top: 20px;">
+        <div class="layui-col-md3 layui-col-md-offset3">
+            <span style="font-size: 30px;"><strong id="tips">开始倒计时&nbsp;:</strong></span>
+            <!--                 <input id="volunteerType" style="display: none"/>-->
+        </div>
+        <div class="layui-col-md5">
+            <p id="p" style="font-size: 30px;">
+                <span id="days" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                <i>天</i>
+                <span id="hours" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                <i>:</i>
+                <span id="minutes" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                <i>:</i>
+                <span id="seconds" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                <i>秒</i>
+            </p>
+            <hr/>
+        </div>
+    </div>
+    <div class="layui-row" style="padding-top: 20px;padding-bottom:20px;border: 5px solid #C9C5C5">
+        <div class="layui-col-md3 layui-col-md-offset2">
+            <div class="layui-inline">
+                <label class="layui-form-label">开始时间:</label>
+                <div class="layui-input-inline">
+                    <input id="startTime" type="text" class="layui-input">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-col-md3 layui-col-md-offset2">
+            <div class="layui-inline">
+                <label class="layui-form-label">截止时间:</label>
+                <div class="layui-input-inline">
+                    <input id="endTime" type="text" class="layui-input"  placeholder="yyyy-MM-dd HH:mm:ss">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md3 layui-col-md-offset4" style="padding-top:100px ">
+            <button id="yes" class="layui-btn" style="width: 300px">确人修改</button>
+        </div>
+
+    </div>
+    <div class="layui-row" style="padding-top: 100px;">
+        <div class="layui-col-md3 layui-col-md-offset4">
+            <button id="assign" class="layui-btn" style="width: 300px">开始分配</button>
+            <button id="assign1" class="layui-btn layui-btn-disabled" style="width: 300px;display: none">开始分配</button>
+        </div>
+    </div>
+
+
+</div>
+
+</body>
+<script>
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+
+        //日期时间选择器
+        laydate.render({
+            elem: '#startTime'
+            ,type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endTime'
+            ,type: 'datetime'
+        });
+
+    });
+</script>
+
+<script>
+    $(function (){
+       getTime();
+        setInterval(getTime,1000);
+        $.ajax({
+            url:"time-list",
+            type:"post",
+            dataType:"json",
+            success:function (res){
+                //为时间选择器赋值
+                $("#startTime").val(res.msg.startTime);
+                $("#endTime").val(res.msg.endTime);
+                //加载时间倒计时
+                countTime(res.msg.startTime,res.msg.endTime);
+                setInterval(countTime,1000,res.msg.startTime,res.msg.endTime);
+            }
+        });
+
+    });
+
+    function getTime(){
+        let date = new Date()
+        let year =  date.getFullYear()
+        let month = date.getMonth()+1
+        let day = date.getDate()
+        let hour = date.getHours()
+        let minute = date.getMinutes()
+        let second = date.getSeconds()
+        hour = hour < 10 ? '0' + hour : hour
+        minute = minute < 10 ? '0' + minute : minute
+        second = second < 10 ? '0' + second : second
+        $("#now").html(year+"年"+month+"月"+day+"日"+hour+"时"+minute+"分"+second+"秒");
+    }
+    $("#yes").click(function(){
+        let start =+new Date($("#startTime").val());
+        let end =+new Date($("#endTime").val());
+        if ((start-end)<0){
+            $.ajax({
+                url:"time-add",
+                type:"post",
+                dataType:"json",
+                data:{"startTime":$("#startTime").val(),"endTime":$("#endTime").val()},
+                success:function(data){
+                    // layer.msg(data.msg,{time:3000,icon:1,shade:[0.5,'#000',true]});
+
+                    // 删除volunteer表中的数据
+                    $.ajax({
+                        url:"delete-volunteer-admin",
+                        type:"post",
+                        dataType:"json",
+                        success:function(res){
+                            window.location.reload();
+                        }
+                    });
+
+                }
+            });
+        }else {
+            layer.msg("提交时间失败,开始时间必须在截止时间之前!",{time:2000,icon:2,shade:[0.5,'#000',true]});
+        }
+
+
+    });
+    //点击分配按钮
+    $("#assign").click(function (){
+
+        //查询volunteer表中是否有数据
+        $.ajax({
+            url:"querry-volunteer-admin",
+            type:"post",
+            dataType:"json",
+            success:function (data){
+                //200代表volunteer表中有数据，可以分配
+                if (data.code==200){
+
+                    //判断老师的总指导人数是否超过学生总人数
+                    $.ajax({
+                        url:"compare-count-admin",
+                        type:"post",
+                        dataType:"json",
+                        success:function (item){
+                            if (item.code==500){
+                                layer.msg("老师指导总人数必须大于学生总人数！还差  "+item.msg+"  人",{time:2000,icon:2,shade:[0.5,'#000',true]});
+                            }else if (item.code==200){
+                                //删除volunteerResult表中的数据
+                                $.ajax({
+                                    url:"delete-volunteerResult-admin",
+                                    type:"post",
+                                    dataType:"json",
+                                    success:function (res){
+                                        //调用分配核心算法，向volunteerResult表中添加数据，删除volunteer表中的数据
+                                        $.ajax({
+                                            url:"assign-student-admin",
+                                            type:"post",
+                                            dataType:"json",
+                                            success:function (res){
+                                                layer.msg("分配完成!",{time:2000,icon:1,shade:[0.5,'#000',true]});
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+
+                }else {
+                    layer.msg("分配失败,已经分配完成!",{time:2000,icon:2,shade:[0.5,'#000',true]});
+                }
+            }
+        });
+
+    });
+    //时间
+    function countTime(startTime,endTime){
+        let now = +new Date();
+        let start =+new Date(startTime);
+        let end =+new Date(endTime);
+        let countTime=now-start;
+        if (countTime<0){
+            // console.log("还没到填报时间");
+            // console.log(countTime);
+            $("#assign").attr("style","width: 300px;display: none");
+            $("#assign1").attr("style","width: 300px;display: inline");
+            $("#tips").html("开始倒计时 :");
+            // 3、计算剩余的毫秒数/1000 == 剩余的秒数
+            let count = (-countTime) / 1000
+            // 4、转换为天时分秒
+            d = parseInt(count/60/60/24)
+            d = d < 10 ? '0' + d : d
+            // days.innerHTML = d
+            $("#days").html(d);
+            h= parseInt(count/60/60%24)
+            h = h < 10 ? '0' + h : h
+            // hours.innerHTML = h
+            $("#hours").html(h);
+            m = parseInt(count/60%60)
+            m = m < 10 ? '0' + m : m
+            // minutes.innerHTML = m
+            $("#minutes").html(m);
+            s = parseInt(count%60)
+            s = s < 10 ? '0' + s : s
+            // seconds.innerHTML = s
+            $("#seconds").html(s);
+        }else {
+            // console.log("填报时间已开始");
+            // console.log(countTime);
+            $("#assign").attr("style","width: 300px;display: none");
+            $("#assign1").attr("style","width: 300px;display: inline");
+            $("#tips").html("结束倒计时 :");
+            let countTime1=now-end;
+            if (countTime1<0){
+                let count = (-countTime1) / 1000
+                // 4、转换为天时分秒
+                d = parseInt(count/60/60/24)
+                d = d < 10 ? '0' + d : d
+                // days.innerHTML = d
+                $("#days").html(d);
+                h= parseInt(count/60/60%24)
+                h = h < 10 ? '0' + h : h
+                // hours.innerHTML = h
+                $("#hours").html(h);
+                m = parseInt(count/60%60)
+                m = m < 10 ? '0' + m : m
+                // minutes.innerHTML = m
+                $("#minutes").html(m);
+                s = parseInt(count%60)
+                s = s < 10 ? '0' + s : s
+                // seconds.innerHTML = s
+                $("#seconds").html(s);
+            }else {
+                $("#assign").attr("style","width: 300px;display: inline");
+                $("#assign1").attr("style","width: 300px;display: none");
+                $("#tips").html("填报时间已结束");
+                $("#p i").html("");
+            }
+
+        }
+    }
+</script>
+</html>

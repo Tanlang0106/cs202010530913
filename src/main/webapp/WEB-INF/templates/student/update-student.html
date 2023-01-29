@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <link rel="stylesheet" type="text/css" href="assets/css/layui.css">
+  <script src="assets/js/jquery-3.2.1.min.js"></script>
+  <script src="assets/layui.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="layui-row">
+        <div class="layui-col-md4">
+            <form class="layui-form" id="myform" onsubmit="return false">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">学号</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="id" disabled  required  lay-verify="required" placeholder="请输入学号" class="layui-input layui-disabled">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="password" value="123" required  lay-verify="required"  class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">名字</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="name" disabled  placeholder="请输入名字" class="layui-input layui-disabled">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">班级</label>
+                    <div class="layui-input-block">
+                        <select id="clazz" lay-verify="required" lay-search>
+                            <option value="2020级7班">2020级7班</option>
+                            <option value="2020级8班">2020级8班</option>
+                            <option value="2020级9班">2020级9班</option>
+                            <option value="2020级10班">2020级10班</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">专业</label>
+                    <div class="layui-input-block">
+                        <select id="major" lay-verify="required" lay-search>
+                            <option value="计算机科学与技术">计算机科学与技术</option>
+                            <option value="数字媒体技术">数字媒体技术</option>
+
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="sex" value="男" title="男">
+                        <input type="radio" name="sex" value="女" title="女">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">手机</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="phone" placeholder="请输入介绍" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">QQ</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="qq" placeholder="请输入介绍" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">邮箱</label>
+                    <div class="layui-input-block">
+                        <input type="email" id="email" placeholder="请输入介绍" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">介绍</label>
+                    <div class="layui-input-block">
+                        <textarea type="text" id="intro" placeholder="请输入介绍" class="layui-input"></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" id="btn">修改</button>
+                        <button class="layui-btn" id="cancel">取消</button>
+                    </div>
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    $(function (){
+        $.ajax({
+            url:"query-type",
+            type:"post",
+            dataType:"json",
+            success:function (res){
+                $.ajax({
+                    url:"querry-student-student",
+                    type:"post",
+                    dataType:"json",
+                    data:{"id":res.id},
+                    success:function (item){
+                        //加载信息
+                        $("#id").val(item.msg.id);
+                        $("#password").val(item.msg.password);
+                        $("#name").val(item.msg.name);
+                        // $("#clazz").val(item.msg.clazz);
+
+                        var obj = document.getElementById("clazz");
+                        for(var i = 0; i < obj.options.length; i++){
+                            var tmp = obj.options[i].value;
+                            if(tmp == item.msg.clazz){
+                                obj.options[i].selected = 'selected';
+                                break;
+                            }
+                        }
+
+
+                        // $("#major").val(item.msg.major);
+                        var obj = document.getElementById("major");
+                        for(var i = 0; i < obj.options.length; i++){
+                            var tmp = obj.options[i].value;
+                            if(tmp == item.msg.major){
+                                obj.options[i].selected = 'selected';
+                                break;
+                            }
+                        }
+                        if (item.msg.sex==null || item.msg.sex==undefined ||item.msg.sex==''){
+                            $("input[type=radio][name=sex][value=男]").attr("checked","checked");
+                        }else {
+                            $("input[type=radio][name=sex][value="+item.msg.sex+"]").attr("checked","checked");
+                        }
+
+                        renderForm();
+                        $("#phone").val(item.msg.phone);
+                        $("#qq").val(item.msg.qq);
+                        $("#email").val(item.msg.email);
+                        $("#intro").val(item.msg.intro);
+
+                    }
+                });
+            }
+        });
+    });
+
+    function renderForm() {
+
+        layui.use('form', function() {
+
+            var form = layui.form; //高版本建议把括号去掉，有的低版本，需要加()
+
+            form.render();
+
+        });
+
+    }
+    $("#btn").click(function (){
+       $.ajax({
+           url:"update-student-student",
+           type:"post",
+           dataType:"json",
+           data:{"id":$("#id").val(),"name":$("#name").val(),"password":$("#password").val(),"clazz":$("#clazz").val(),"major":$("#major").val(),"sex":$("input:radio[name='sex']:checked").val(),"phone":$("#phone").val(),"qq":$("#qq").val(),"email":$("#email").val(),"intro":$("#intro").val()},
+           success:function (data){
+             console.log(data);
+             window.location.href="student-detail-student";
+           }
+       }) ;
+    });
+    $("#cancel").click(function (){
+        window.location.href="student-detail-student";
+    });
+</script>
+</html>

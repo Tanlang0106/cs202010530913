@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <link rel="stylesheet" type="text/css" href="assets/css/layui.css">
+  <script src="assets/jquery-3.6.0.min.js"></script>
+  <script src="assets/layui.js"></script>
+</head>
+<body>
+  <div id="ct">
+
+  </div>
+ <button type="button" id="btn">数据</button>
+</body>
+  <script>
+    $("#btn").click(function (){
+      $.ajax({
+        url:"queryAllStudent",
+        dataType:"json",
+        type:"get",
+        success:function (res){
+            // console.log(res);
+            $.each(res.msg,function (i,item){
+                // console.log(item);
+                // console.log("==========");
+                // if (i==1){
+                    let binary="";
+                    const bytesOne=new Uint8Array(item.image);
+                    const len=bytesOne.byteLength;
+
+                    for(let s=0;s<len;s++){
+                        binary+=String.fromCharCode(bytesOne[s]);
+                    }
+                    let imageBase64One=window.btoa(binary);
+                    console.log(imageBase64One);
+
+                    let image1="<img style='padding-top: 10px;max-width: 60%;max-height:60%' src='data:image/jpg;base64,"+imageBase64One+"'/>";
+                    $("#ct").append(image1);
+                // }
+
+
+            });
+        }
+      });
+    });
+  </script>
+</html>

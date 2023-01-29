@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tl.mapper.StudentMapper">
+<!--    查询所有的学生数据-->
+    <select id="querryAllStudent" resultType="tl.pojo.Student">
+        select * from student
+    </select>
+    <!--通过分页查询所有学生数据-->
+    <select id="querryAllStudentByPage" resultType="tl.pojo.Student">
+        select * from student order by clazz asc limit #{begin},#{pageSize}
+    </select>
+<!--    添加学生数据-->
+    <insert id="addStudnet" parameterType="tl.pojo.Student">
+        insert into student(id,password,name,clazz,major,sex,intro,image) values (#{id},#{password},#{name},#{clazz},#{major},#{sex},#{intro},#{image})
+    </insert>
+    <!--查询数据条数-->
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(*) from student
+    </select>
+    <!--    管理员删除学生数据-->
+    <delete id="deleteStudent" parameterType="java.lang.String">
+        delete from student where id=#{id}
+    </delete>
+    <!--    管理员添加学生数据-->
+    <insert id="addStudentByAdmin" parameterType="tl.pojo.Student">
+        insert into student(id,password,name) values (#{id},#{password},#{name})
+    </insert>
+    <!--    管理员修改学生数据-->
+    <update id="updateStudentByAdmin" parameterType="tl.pojo.Student">
+        update student
+        set password=#{password},name=#{name}
+        where id=#{id};
+    </update>
+<!--    通过id查询学生信息-->
+    <select id="querryStudentById" parameterType="java.lang.String" resultType="tl.pojo.Student">
+        select * from student where id=#{id}
+    </select>
+
+
+
+    <select id="querryStudentExist" resultType="java.lang.Integer">
+        select count(*) from student where id=#{id} and password=#{password}
+    </select>
+
+<!--    修改学生头像-->
+    <update id="updateImage">
+        update student set image=#{image} where id=#{id}
+    </update>
+
+    <update id="updateStudentByStudent" parameterType="tl.pojo.Student">
+        update student
+        set name=#{name},password=#{password},clazz=#{clazz},major=#{major},sex=#{sex},intro=#{intro},phone=#{phone},qq=#{qq},email=#{email}
+        where id=#{id}
+    </update>
+
+    <select id="querryTeacherCountByStudent" resultType="java.lang.Integer">
+        select count(*) from teacher
+    </select>
+
+</mapper>

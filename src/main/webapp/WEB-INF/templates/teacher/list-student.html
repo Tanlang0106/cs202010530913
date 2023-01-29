@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="assets/css/layui.css">
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+    <script src="assets/layui.js"></script>
+    <style>
+        .layui-table-cell{
+            height:80px;
+            line-height: 100px;
+        }
+    </style>
+</head>
+<body>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+</script>
+<div class="layui-row">
+    <div class="layui-col-md1 layui-col-md-offset5" style="margin-top: 20px;padding-top: 10px;padding-bottom: 10px;padding-left:18px;background-color: #5FB878">
+        <span style="font-size: 18px;">我的学生</span>
+    </div>
+</div>
+<div class="layui-row" style="margin-top: 20px">
+    <table id="demo" lay-filter="test"></table>
+</div>
+
+
+</body>
+<script>
+    layui.use(function () {
+        var table = layui.table;
+
+        //第一个实例
+        table.render({
+            elem: '#demo' //对应表格的id
+            //,height: 312
+            , toolbar: '#toolbarDemo'
+            , url: 'getAllStudent-teacher' //数据接口
+            ,type:'get'
+            , page: false //关闭分页
+            , cols: [[ //表头
+                 {align:'center', title: '编号',type:'numbers',width:100}
+                ,{field: 'id', title: '学号', width: 180, sort: true}
+                , {field: 'name', title: '姓名', width: 100}
+                , {field: 'image', title: '头像', width: 200,templet:function (data){
+                        let binary="";
+                        const bytesOne=new Uint8Array(data.image);
+                        const len=bytesOne.byteLength;
+                        for(let s=0;s<len;s++){
+                            binary+=String.fromCharCode(bytesOne[s]);
+                        }
+                        let imageBase64One=window.btoa(binary);
+                        return "<img style='width: 100%;height: 100%' src='data:image/jpg;base64,"+imageBase64One+"'/>";
+                    }}
+                , {field: 'password', title: '密码', width: 180}
+                , {field: 'sex', title: '性别', width: 80}
+                , {field: 'clazz', title: '班级', width: 180, sort: true}
+                , {fixed: 'right', width: 200, align: 'center', toolbar: '#barDemo'}
+
+            ]]
+        });
+
+        //监听行工具事件
+        table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data //获得当前行数据
+                ,layEvent = obj.event; //获得 lay-event 对应的值
+            if(layEvent === 'detail'){
+                window.location.href="student-detail-teacher?studentID="+data.id;
+            }
+        });
+
+
+
+
+    });
+</script>
+
+</html>

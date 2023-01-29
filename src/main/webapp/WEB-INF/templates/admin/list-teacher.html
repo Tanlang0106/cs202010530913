@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="assets/css/layui.css">
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+    <script src="assets/layui.js"></script>
+    <style>
+        .layui-table-cell{
+            height:100px;
+            line-height: 100px;
+        }
+    </style>
+</head>
+<body>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+        <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="update">修改</button>
+    </div>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+</script>
+
+<table id="demo" lay-filter="test"></table>
+</body>
+ <script>
+     layui.use(function () {
+         var table = layui.table;
+
+         //第一个实例
+         table.render({
+             elem: '#demo' //对应表格的id
+             // ,height: 312
+             , toolbar: '#toolbarDemo'
+             , url: 'getAllTeacher-admin' //数据接口
+             ,type:'get'
+             , page: true //开启分页
+             , cols: [[ //表头
+                 {field: 'id',type: 'checkbox', fixed: 'left'}
+                 ,{field: 'id', title: '工号', width: 100, sort: true}
+                 , {field: 'name', title: '姓名', width: 100}
+                 , {field: 'password', title: '密码', width: 180}
+                 , {field: 'image', title: '头像', width: 200,templet:function (data){
+                         let binary="";
+                         const bytesOne=new Uint8Array(data.image);
+                         const len=bytesOne.byteLength;
+                         for(let s=0;s<len;s++){
+                             binary+=String.fromCharCode(bytesOne[s]);
+                         }
+                         let imageBase64One=window.btoa(binary);
+                         return "<img style='width: 100%;height: 100%' src='data:image/jpg;base64,"+imageBase64One+"'/>";
+                     }}
+                 , {field: 'intro', title: '简介', width: 180, sort: true}
+                 , {field: 'count', title: '指导人数', width: 120, sort: true}
+
+             ]]
+         });
+
+         //触发事件
+         table.on('toolbar(test)', function(obj){
+             var checkStatus = table.checkStatus(obj.config.id);
+             var data=checkStatus.data;
+             switch(obj.event){
+                 case 'add':
+                     layer.open({
+                         type: 2,
+                         title:'添加老师信息',
+                         shadeClose:true,
+                         shade:0.8,
+                         area:['400px','560px'],
+                         content: 'teacher-add-admin' //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+                     });
+                     break;
+                 case 'delete':
+                     if(data.length == 0){
+                         layer.msg('请选择一行');
+                     } else if(data.length >= 1){
+                         // var ids[];
+                         var xxxx="";
+                         $.each(data,function (i,item){
+                             xxxx=xxxx+","+item.id;
+                         });
+
+                         //询问框
+
+                         layer.confirm('确定要删除选中的老师数据？', {
+                             btn: ['确定','取消'] //按钮
+                         }, function(){
+                             $.ajax({
+                                 url:"teacher-delete",
+                                 type:"post",
+                                 data:{"teacherID":xxxx},
+                                 dataType:"json",
+                                 success:function (res){
+                                     layer.closeAll();
+                                     if(res.code==200){
+                                         layer.msg("删除了"+res.count+"位老师的数据");
+                                         table.reload("demo");
+                                     }else {
+                                         layer.msg("删除失败");
+                                     }
+                                 }
+                             });
+                         }, function(){
+
+                         });
+                     }
+                     break;
+                 case 'update':
+                     if(data.length === 0){
+                         layer.msg('请选择一行');
+                     } else if(data.length > 1){
+                         layer.msg('只能同时编辑一个');
+                     } else {
+
+                         layer.open({
+                             type: 2,
+                             title:'修改老师信息',
+                             shadeClose:true,
+                             shade:0.8,
+                             area:['400px','560px'],
+                             content: 'teacher-update-admin?teacherID='+data[0].id, //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+                         });
+
+                     }
+
+                     break;
+             };
+         });
+
+
+
+
+
+     });
+ </script>
+</html>

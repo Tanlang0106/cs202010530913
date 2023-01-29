@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>志愿填报</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/layui.css">
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+    <script src="assets/layui.js"></script>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="add">添加</a>
+    </script>
+</head>
+<body>
+     <div class="layui-container">
+<!--         倒计时-->
+         <div class="layui-row">
+             <div class="layui-col-md3 layui-col-md-offset3">
+                 <span style="font-size: 30px;"><strong id="tips">开始倒计时&nbsp;:</strong></span>
+<!--                 <input id="volunteerType" style="display: none"/>-->
+             </div>
+             <div class="layui-col-md5">
+                 <p id="p" style="font-size: 30px;">
+                     <span id="days" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                     <i>天</i>
+                     <span id="hours" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                     <i>:</i>
+                     <span id="minutes" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                     <i>:</i>
+                     <span id="seconds" style="width:35px;height:35px;border-radius: 5px;background-color: #303430;color: #C9C5C5;"></span>
+                     <i>秒</i>
+                 </p>
+                 <hr/>
+             </div>
+
+         </div>
+<!--         循环出的志愿框-->
+         <div class="layui-row" style="margin-top: 5px;">
+             <div id="content">
+
+             </div>
+         </div>
+<!--         加载老师信息的数据表格-->
+         <div class="layui-row" style="margin-top: 10px;">
+             <div id="foot">
+                 <hr/>
+                 <table id="demo" lay-filter="test"></table>
+             </div>
+         </div>
+<!--         提交志愿按钮-->
+         <div class="layui-row" style="margin-top: 30px;">
+             <div class="layui-col-md3 layui-col-md-offset5">
+                 <button id="submitVolunteer" class="layui-btn" style="width: 300px">提交志愿</button>
+                 <button id="submitVolunteer1" class="layui-btn layui-btn-disabled" style="width: 300px;display: none">提交志愿</button>
+             </div>
+         </div>
+
+     </div>
+
+</body>
+    <script>
+        var currentId;
+        var time1;
+        var time2;
+        $(function (){
+           $.ajax({
+               url:"time-student",
+               type:"post",
+               dataType:"json",
+               success:function (res){
+                   //将开始时间和截止时间存在前端
+                   time1=res.msg.startTime;
+                   time2=res.msg.endTime;
+                   //获取当前账号的id,判断当前时间端给出提示,并且判断该同学是否已经填报了志愿
+                   querryId();
+                   countTime(res.msg.startTime,res.msg.endTime);
+                   setInterval(countTime,1000,res.msg.startTime,res.msg.endTime);
+                   //循环出志愿框
+                   eachVolunteer();
+                   //加载出含有老师信息的数据表格
+                   loadTeacher();
+
+               }
+           });
+        });
+        //判断该同学是否已经填报了志愿
+        function volunteerContent(){
+            $.ajax({
+               url:"querry-volunteerByStudent-admin",
+               type:"post",
+               dataType:"json",
+               data:{"studentId":currentId},
+                success:function (res){
+                   //判断现在是哪个时间端
+                    let now = +new Date();
+                    let start =+new Date(time1);
+                    let end =+new Date(time2);
+                    if (now<=start){
+                        layer.msg("填报时间还未开始",{time:2000,icon:2,shade:[0.5,'#000',true]});
+                    }else if (now>start && now<end) {
+                        if (res.code==500){
+                            layer.msg("未提交过志愿",{time:2000,icon:2,shade:[0.5,'#000',true]});
+                        }else if (res.code==200){
+                            $.each(res.msg,function (i,item){
+                                $.ajax({
+                                    url:"querry-teacherId-admin",
+                                    type:"post",
+                                    dataType:"json",
+                                    data:{"id":item.teacherId},
+                                    success:function(data){
+                                        $("#a"+(i+1)).html(data.msg.name);
+                                    }
+                                });
+                                $("#c"+(i+1)).val(item.teacherId);
+                                $("#"+(i+1)).attr("style","display:none");
+                                $("#b"+(i+1)).attr("style","display:inline");
+
+                            });
+                            layer.msg("已提交过志愿",{time:2000,icon:1,shade:[0.5,'#000',true]});
+                        }
+                    }else if (now>=end){
+                        layer.msg("填报时间已结束",{time:2000,icon:2,shade:[0.5,'#000',true]});
+                    }
+                }
+            });
+        }
+        //获取当前账号的id
+        function querryId(){
+            $.ajax({
+               url:"query-type",
+                type:"post",
+                dataType:"json",
+                success:function (res){
+                   currentId=res.id;
+                    //判断该同学是否已经填报了志愿
+                   volunteerContent();
+                }
+            });
+        }
+        //点击提交按钮后
+        $("#submitVolunteer").click(function (){
+            //判断志愿框是否填完整
+            var x=0;
+            for(var i=0;i<$("#content input").length;i++){
+                if($("#c"+(i+1)).val()==null || $("#c"+(i+1)).val()==""){
+                    x=1;
+                    break;
+                }
+            }
+            if (x==1){
+                layer.msg("添加失败,志愿未填完整",{time:2000,icon:2,shade:[0.5,'#000',true]});
+            }else if (x==0){
+                //添加志愿前先将该同学volunteer中的志愿数据删除
+                $.ajax({
+                    url:"delete-volunteer-student",
+                    type:"post",
+                    data:{"studentId":currentId},
+                    dataType:"json",
+                    success:function (data){
+                        for (var i=0;i<$("#content input").length;i++){
+                            //获取当前时间
+                            var date = new Date();
+                            var year = date.getFullYear();
+                            var month = date.getMonth() + 1;
+                            var day = date.getDate();
+                            var Hours = date.getHours();
+                            var Minutes = date.getMinutes();
+                            var Seconds = date.getSeconds();
+                            if (month < 10) {
+                                month = "0" + month;
+                            }
+                            if (day < 10) {
+                                day = "0" + day;
+                            }
+                            var s_createtime = year + '-' + month + '-' + day + ' ' + Hours + ':' + Minutes + ':' + Seconds;
+                            //循环添加学生志愿
+                            $.ajax({
+                                url:"submit-volunteer-student",
+                                type:"post",
+                                data:{"studentId":currentId,"teacherId":$("#c"+(i+1)).val(),"order":i+1,"time":s_createtime},
+                                dataType:"json",
+                                success:function (data){
+                                }
+                            });
+                        }
+                        layer.msg("志愿提交成功",{time:2000,icon:1,shade:[0.5,'#000',true]});
+                    }
+                });
+
+
+            }
+
+        });
+
+        //加载出含有老师信息的数据表格
+        function loadTeacher(){
+            layui.use(function () {
+                var table = layui.table;
+
+                //第一个实例
+                table.render({
+                    elem: '#demo' //对应表格的id
+                    // ,height: 312
+                    // , toolbar: '#toolbarDemo'
+                    , url: 'getAllTeacher-admin' //数据接口
+                    ,type:'get'
+                    , page: true //开启分页
+                    , cols: [[ //表头
+                        // {field: 'id',type: 'checkbox', fixed: 'left'}
+                        {align:'center', title: '编号',type:'numbers',width:100}
+                        ,{field: 'id', title: '工号', width: 100, hide:true}
+                        , {field: 'name', title: '姓名', width: 100}
+                        // , {field: 'password', title: '密码', width: 180}
+                        , {field: 'sex', title: '性别', width: 50}
+                        // , {field: 'image', title: '头像', width: 200,templet:function (data){
+                        //         let binary="";
+                        //         const bytesOne=new Uint8Array(data.image);
+                        //         const len=bytesOne.byteLength;
+                        //         for(let s=0;s<len;s++){
+                        //             binary+=String.fromCharCode(bytesOne[s]);
+                        //         }
+                        //         let imageBase64One=window.btoa(binary);
+                        //         return "<img style='width: 100%;height: 100%' src='data:image/jpg;base64,"+imageBase64One+"'/>";
+                        //     }}
+                        , {field: 'intro', title: '简介', width: 380, sort: true}
+                        , {field: 'count', title: '指导人数', width: 180, sort: true}
+                        , {fixed: 'right', width: 100, align: 'center', toolbar: '#barDemo'}
+
+                    ]]
+                });
+                //监听行工具事件
+                table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+                    var data = obj.data //获得当前行数据
+                        ,layEvent = obj.event; //获得 lay-event 对应的值
+                    if(layEvent === 'add'){
+                        //1为没有自己选中的老师，0为有自己选中的老师
+                        var m=0;
+                        //判断所有的志愿框的值是否已经有自己选中的老师
+                        for(var n=0;n<$("#content input").length;n++){
+                            if ($("#c"+(n+1)).val()==data.id){
+                                layer.msg("添加失败,志愿不能重复",{time:2000,icon:2,shade:[0.5,'#000',true]});
+                                m=0;
+                                break;
+                            }else {
+                                m=1;
+                            }
+                        }
+                        if (m==1){
+                            //判断哪个志愿框为空
+                            for(var i=0;i<$("#content input").length;i++){
+                                if($("#c"+(i+1)).val()==null || $("#c"+(i+1)).val()==""){
+                                    $("#c"+(i+1)).val(data.id);
+                                    $("#a"+(i+1)).html(data.name);
+                                    addVolunteer(i+1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        //循环出志愿框
+        function eachVolunteer(){
+            $.ajax({
+               url:"querry-teacherCount-student",
+                type:"post",
+                dataType: "json",
+                success:function (res){
+                    for(var i=0;i<parseInt(res.count);i++){
+                        var s="<div class='layui-col-md2 layui-col-md-offset1' style='border:3px solid blue;background-color: aquamarine; margin-top:5px;'>"
+                            +			"<span>第"+(i+1)+"志愿:&nbsp;&nbsp;</span>"
+                            +			"<span id='a"+(i+1)+"'></span>"
+                            +           "<input id='c"+(i+1)+"' style='display: none'>"
+                            +			"<img id='"+(i+1)+"' type='button' src='image/添加用户.png'>"
+                            +           "<img id='b"+(i+1)+"' type='button' src='image/取消.png' onclick='deleteVolunteer("+(i+1)+")' style='display:none'></div>";
+                        $("#content").append(s);
+                    }
+                }
+            });
+
+        }
+        //添加志愿
+        function addVolunteer(i){
+            layer.msg("添加志愿"+i);
+            $("#"+i).attr("style","display:none");
+            $("#b"+i).attr("style","display:inline");
+            // $("#a"+i).html("唐青松");
+        }
+        // 删除志愿
+        function deleteVolunteer(i){
+            layer.msg("取消志愿"+i);
+            $("#"+i).attr("style","display:inline");
+            $("#b"+i).attr("style","display:none");
+            $("#c"+i).val("");
+            $("#a"+i).html("");
+        }
+
+        //时间
+        function countTime(startTime,endTime){
+            let now = +new Date();
+            let start =+new Date(startTime);
+            let end =+new Date(endTime);
+            let countTime=now-start;
+            if (countTime<0){
+                // console.log("还没到填报时间");
+                // console.log(countTime);
+                $("#submitVolunteer").attr("style","width: 300px;display: none");
+                $("#submitVolunteer1").attr("style","width: 300px;display: inline");
+                $("#tips").html("开始倒计时 :");
+                // 3、计算剩余的毫秒数/1000 == 剩余的秒数
+                let count = (-countTime) / 1000
+                // 4、转换为天时分秒
+                d = parseInt(count/60/60/24)
+                d = d < 10 ? '0' + d : d
+                // days.innerHTML = d
+                $("#days").html(d);
+                h= parseInt(count/60/60%24)
+                h = h < 10 ? '0' + h : h
+                // hours.innerHTML = h
+                $("#hours").html(h);
+                m = parseInt(count/60%60)
+                m = m < 10 ? '0' + m : m
+                // minutes.innerHTML = m
+                $("#minutes").html(m);
+                s = parseInt(count%60)
+                s = s < 10 ? '0' + s : s
+                // seconds.innerHTML = s
+                $("#seconds").html(s);
+                // console.log(d+"天"+h+"小时"+m+"分"+s+"秒");
+                // $("#countdown").html(d+"天"+h+"小时"+m+"分"+s+"秒");
+            }else {
+                // console.log("填报时间已开始");
+                // console.log(countTime);
+                $("#submitVolunteer").attr("style","width: 300px;display: inline");
+                $("#submitVolunteer1").attr("style","width: 300px;display: none");
+                $("#tips").html("结束倒计时 :");
+                let countTime1=now-end;
+                if (countTime1<0){
+                    let count = (-countTime1) / 1000
+                    // 4、转换为天时分秒
+                    d = parseInt(count/60/60/24)
+                    d = d < 10 ? '0' + d : d
+                    // days.innerHTML = d
+                    $("#days").html(d);
+                    h= parseInt(count/60/60%24)
+                    h = h < 10 ? '0' + h : h
+                    // hours.innerHTML = h
+                    $("#hours").html(h);
+                    m = parseInt(count/60%60)
+                    m = m < 10 ? '0' + m : m
+                    // minutes.innerHTML = m
+                    $("#minutes").html(m);
+                    s = parseInt(count%60)
+                    s = s < 10 ? '0' + s : s
+                    // seconds.innerHTML = s
+                    $("#seconds").html(s);
+                }else {
+                    $("#submitVolunteer").attr("style","width: 300px;display: none");
+                    $("#submitVolunteer1").attr("style","width: 300px;display: inline");
+                    $("#tips").html("填报时间已结束");
+                    $("#p i").html("");
+                }
+
+            }
+        }
+    </script>
+</html>
